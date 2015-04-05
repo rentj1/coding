@@ -1,0 +1,11 @@
+var datastore = {
+
+    side:[
+        {
+          href: "./rotate/",
+          title: "微薄中的图片放大/缩小/旋转",
+          date: "2013-02-12"
+        }
+    ]
+
+}

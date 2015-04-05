@@ -7,7 +7,7 @@ a:hover{ text-decoration:underline; color:#f00}
 .page{ width:1000px; margin:0 auto; overflow:hidden}
 .loading{ text-align:center;}
 .mod-header,
-.mod-bottom{ font-size:36px; font-family:微软雅黑; color:#0000FF}
+.mod-bottom{ font-size:36px; font-family:微软雅黑; color:#0000FF; line-height:60px}
 .mod-header{ padding-bottom:10px;}
 .mod-header .logo{ color:#0000FF }
 .mod-content{ float:left; padding-right:10px; zoom:1; background-color:#fff;}
@@ -37,3 +37,23 @@ a:hover{ text-decoration:underline; color:#f00}
 
 iframe{ vertical-align:top;}
 .iframe{ padding-bottom:10px; background-color:#fff}
+
+
+
+.mod-header {
+    overflow: hidden;
+    height: 60px;
+    line-height: 60px;
+}
+
+.mod-header .logo {
+    float: left
+}
+
+.mod-header .baner {
+    float: right;
+    padding-left: 165px;
+}
+
+.mod-header .baner img {
+}
