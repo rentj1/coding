@@ -5,6 +5,19 @@ var datastore = {
           href: "./rotate/",
           title: "微薄中的图片放大/缩小/旋转",
           date: "2013-02-12"
+        },
+
+        {
+          href: "./apple/",
+          title: "苹果任务栏菜单缩放效果",
+          date: "2013-02-20"
+        },
+
+
+        {
+          href: "./magnifier/",
+          title: "京东产品图片放大镜效果演示",
+          date: "2013-02-30"
         }
     ]
 
