@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset='utf-8' />
+	<title>webgl</title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<script>
+
+	var canvas = document.getElementById('canvas');
+	var gl = canvas.getContext('webgl');
+
+	function initShaders(gl, vshader_souce, fshader_source){
+		var vshader = gl.createShader(gl.VERTEX_SHADER);  
+		var fshader = gl.createShader(gl.FRAGMENT_SHADER);
+		var program = gl.createProgram();
+
+		//指定着色器源代码
+		gl.shaderSource(vshader, vshader_souce); 
+		gl.shaderSource(fshader, fshader_source); 
+
+		//编译着色器
+		gl.compileShader(vshader); 
+		gl.compileShader(fshader);
+
+		//使用程序对象连接着色器
+	    gl.attachShader(program, vshader);  
+	    gl.attachShader(program, fshader); 
+	    gl.linkProgram(program); 
+
+	    if(gl.getProgramParameter(program, gl.LINK_STATUS)){ 
+	    	gl.useProgram(program);  
+	    }else{
+	    	alert(gl.getProgramInfoLog(program));
+	    }
+
+	    gl.program = program;
+
+	}
+
+	//顶点着色器
+	var VSHADER_SOURCE = [
+		'attribute vec4 a_Position;',
+		'attribute vec4 a_FragColor;',
+		'varying vec4 v_FragColor;',
+		'void main(){ ',
+			'gl_Position = a_Position;',
+			'v_FragColor = a_FragColor;',
+			//'gl_PointSize = 10.0;',
+		'}'
+
+	].join('');
+
+	//片段着色器
+	//片段着色器中的flat类型没有默认精度所以，需要单独制定精度限定符
+	var FSHADER_SOURCE = [
+		'precision mediump float;',
+		'varying vec4 v_FragColor;',
+		'void main(){ ',
+			'gl_FragColor = v_FragColor;',
+		'}'
+
+	].join('');
+	
+	initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+
+
+	//把顶点数据传输到着色器
+
+	//1.获取变量a_Position在顶点着色器中的地址引用
+	//var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+
+	// if(a_Position < 0){
+	// 	alert(a_Position);
+	// }
+
+	//2.向顶点着色器中attribute修饰的a_Position变量传输数据0.0, 0.0, 0.0
+    //gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
+
+
+    //使用缓冲区
+    //创建缓冲区
+    //绑定缓冲区
+    //向缓冲区写入数据
+    //开启数据缓冲区
+
+
+	gl.clearColor(0.0,0.0,0.0,1.0);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	//gl.drawArrays(gl.POINTS, 0, 1);
+
+
+
+	var vertices = new Float32Array([
+		0.0,  0.75, 1.0, 0.0, 0.0,
+	   -0.5, -0.75, 0.0, 1.0, 0.0,
+		0.5, -0.75, 0.0, 0.0, 1.0
+	]);
+
+	makeVertexBuffer(gl, vertices);
+
+	gl.drawArrays(gl.TRIANGLES, 0, 3)//
+ 
+
+
+	function makeVertexBuffer(gl, dataArray){
+		var FSIZE = dataArray.BYTES_PER_ELEMENT;//Float32Array中每个元素所占用的字节数
+
+		//console.log(FSIZE)
+		var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+		var a_FragColor = gl.getAttribLocation(gl.program, 'a_FragColor');
+		var buffer = gl.createBuffer();//创建缓冲区对象
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer)//绑定对象到到指定类型的缓冲区目标上
+
+		gl.bufferData(gl.ARRAY_BUFFER, dataArray, gl.STATIC_DRAW);//写入数据到到webgl缓冲区中
+
+
+		//将绑定到gl.ARRAY_BUFFER的缓冲区对象分配给a_Position执向的attribute变量
+		gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, gl.FALSE, FSIZE * 5, 0); //将缓冲区对象分配给一个attribute变量
+		gl.vertexAttribPointer(a_FragColor, 3, gl.FLOAT, gl.FALSE, FSIZE * 5, FSIZE * 2); //将缓冲区对象分配给一个attribute变量
+
+		//开启(激活)attribute变量，使缓冲区对a_Position变量的分配生效。
+		gl.enableVertexAttribArray(a_Position); //开启attribute变量
+		gl.enableVertexAttribArray(a_FragColor); //开启attribute变量
+	}
+
+
+  
+
+/*   
+
+	 gl.VertexAttribPointer(	
+		index,          //指定attribute变量的存储位置
+		size,  		   //指定缓冲区中每个顶点的分量个数1到4
+		type,         //缓冲区中元素的指定数据类型
+		normalized,  //表示是否将浮点型的数据行归一化到[0,1]或[－1,1]，webgl中都为flase
+		stride,     //指定相邻两个顶点件的字节数，默认为0
+		offset     //指定缓冲区对象中的偏移量（以字节为单位）即attribute变量从缓冲区中的何处开始存储，如果是从起位置开始的，ooffset为0
+	);   
+
+
+	  参数stride表示，在缓冲区对象中，单个顶点的所有数据（这里就是顶点的坐标和颜色）的字节数，也就是相邻两个顶点间的距离，即不进参数。
+	  参数offset表示，在缓冲区，当前使用的数据项目距离相对于单个顶点数据中第一个元素的偏移量（以字节为计算单位）
+	  代码中使用了varying修饰符把数据从javascript中传输到了顶点着色器中，又从顶点着色器中传到了片段着色器中。
+	  
+ */
+
+
+
+</script>
+</body>
+</html>
