@@ -1,0 +1,59 @@
+<div class="text-box J_select disable" style="width:120px" id="J_province">
+    <div class="select-text">
+        <span class="J_selectOption">请选择</span>
+        <b class="icon">&#xe609;</b>
+    </div>
+    <input type="hidden" class="J_SelectValue" name="provinceId" />
+    <ul class="select-list" data-bind="address.provinces">
+        <li>请选择省份</li>
+        {{#each(provinces)}}
+        {{#if( selected )}}
+        <li class="selected" data-value="{{key}}" >{{name}}</li>
+        {{else}}
+        <li data-value="{{key}}" >{{name}}</li>
+        {{/if}}
+        {{/each}}
+    </ul>
+</div>
+
+<div class="text-box J_select disable"
+     style="width:135px;{{#if( !cities.length )}} display:none{{/if}}" id="J_city">
+
+<div class="select-text">
+    <span class="J_selectOption">请选择城市</span>
+    <b class="icon">&#xe609;</b>
+</div>
+<input type="hidden" class="J_SelectValue" name="cityId" />
+<ul class="select-list" data-bind="address.cities">
+    <li>请选择</li>
+    {{#each(cities)}}
+    {{#if( selected )}}
+    <li class="selected" data-value="{{key}}">{{name}}</li>
+    {{else}}
+    <li data-value="{{key}}" >{{name}}</li>
+    {{/if}}
+    {{/each}}
+</ul>
+</div>
+
+<div class="text-box J_select disable"
+     style="width:108px;{{#if( !areas.length )}} display:none{{/if}}"  id="J_area">
+<div class="select-text">
+    <span class="J_selectOption">请选择区／县</span>
+    <b class="icon">&#xe609;</b>
+</div>
+<input type="hidden" class="J_SelectValue" name="areaId" />
+<ul class="select-list" data-bind="address.areas">
+    <li>请选择区／县</li>
+    {{#each(areas)}}
+    {{#if( selected )}}
+    <li class="selected" data-value="{{key}}">{{name}}</li>
+    {{else}}
+    <li data-value="{{key}}">{{name}}</li>
+    {{/if}}
+    {{/each}}
+</ul>
+</div>
+
+<span class="suggest-select J_SuggestSelect"></span>
+<span class="info"><span>

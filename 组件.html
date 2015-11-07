@@ -1,0 +1,159 @@
+
+action 对应ui上的一个动作，相当于一个事件处理函数, 参数信息包含了ui 中的数据
+
+control 包含了对ui对象的引用。
+
+一个标签唯一标识一个组件， 这个标签封装了组件内部逻辑. 组件应该功能明确，组件相对独立运行在自己的作用域中，不应该对页面的其他部分产生影响，组件之间的交互的唯一途径是组件对外公开的接口，可以被集成承到页面中，组件可以和其他组件一起组成一个更大的组件。
+组件包含html/css/img/js。
+
+控件的声明属性可以通过编程的方式访问
+
+方法：
+继承: WebControls基类或其派生类。
+定义：空间属性、方法和控件名称
+重写：RenderContents 方法 
+
+
+
+组件的分原则，就是把页面的功能分解成不同组件，组件自己管理自己，不需要外界干预。分，是分解的意思。治，是治理管理的意思。国家的管理管理有自治区。
+
+组件的组成部分，
+
+
+html 模版引擎负责管理组件渲染，拥有数据源（可能来自服务端也可能是本地数据），视图元素引用，捕获用户行为，触发事件，执行action。 对外公开抽象事件
+
+acrion:{ this.nameLable.text = xxx}
+
+视图根据状态数据自己更新自己。
+状态数据怎么更新？捕获用户行为，触发事件，执行action，更新状态数据
+视图元素绑定内部dom事件，应该有视图控制器
+谁可以对dom进行操作。
+
+视图控制器拉向视图模型拉数据， 
+还是视图模型推数据给视图控制器， 什么时候？updae,什么使用upde调用了他的某个方法
+
+
+视图：      封装dom信息，处理渲染，可以对视图控制器公开视图元素。 通过监听dom事件捕获用户行为，向观察者广播用户行为。
+视图控制器： 对dom信息完全不知道， 视图控制器只能访问视图公开的成员， 
+向视图注册自己关心的用户行为成为视图的观察者，根据不同行为执行action。
+通过视图模型拿到数据, view.update(data); 
+
+
+
+视图引用视图模型，
+视图控制引用视图和视图模型
+视图模型
+
+Compinent {
+
+  Contorller观察View,
+
+  Contorller,从Model获取数据，
+  Conroller,使用Model数据更新View
+
+}
+
+
+
+
+
+
+视图模型：   不知道用户在操作界面上做了什么，这层信息被视图控制器给封装了。需要提供什么数据组件，可以根据用户行为更新自己， 提供异步和同步两种方式
+
+视图模型应用视图控制器，注册视图控制器onacton，调用自己的方法，得到数据control.update(ddd)
+
+
+
+在前端中没有modle， 业务逻辑都在服务端处理过了， 在前端view需要的view model
+
+
+
+
+基于事件模式还是标准的观察者模式实现。 异步观察者的实现方式
+
+
+
+//Model 2是什么
+
+
+实现：
+<script type="text/javascript">
+
+import tpl from './calendar.tpl';
+//CUIontrol 
+//属性:
+   //pushlic Array controls; 这个属性包含了template包含了data-id属性元素的引用
+   //public Array source
+//方法
+   //fire(event, args)
+   //onbind 组件生命周期回调，在这里给元素绑定事件
+   //render() {
+	   	//this.template.render(this.source)
+	//}
+
+
+class Calendar extends CUIontrol {
+
+  constructor(x, y, color) {
+
+    super({
+    	template: new template(tpl)
+    });
+
+    // 调用CUIontrol类的构造函数，初始化组件cotrols属性，这个属性包含了template包含了data-id属性元素的引用
+    this.source = [
+    	years:[],
+    	monthes:[],
+    	dates:[]
+    ];
+
+    //this.template = new template(tpl);
+  }
+
+  //action
+  confirm_click(ev){
+		var args = new CalendarSelectedEventArgs();
+		self.fire('selected', args);
+  }
+
+  onbind(){
+  	var self = this;
+	var confirm = this.contorls['confirm'];
+	confirm.on('click', confirm_click);
+  }
+}
+
+</script>
+
+组件怎么获取它要渲染的数据? 组件有一个属性source,包含了需要渲染的数据
+视图里面的元件怎么获取？ 在哪里给元素绑定事件？
+
+var submit = this.contorls['submitID'];
+
+使用：
+
+1.声明方式
+<cui:calaendar onselected="calendar_selected" data-source='http://www.3w.com/path/xxx.json' maxdate="2015-01-22" time="true"  />
+
+
+2.编程方式
+<script type="text/javascript">
+var calendar = new Calendar({
+	maxdate:'2015-01-22',
+	time:true
+});
+
+calendar.on('selected', function(selectedEnentArgs){
+	
+});
+
+</script>
+
+
+
+
+
+
+Babel 
+  es6编译到es5
+  jsx编译到jsr

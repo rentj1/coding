@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset='utf-8' />
+	<title>webgl(模型矩阵，视图矩阵， 投影矩阵， 清楚深度缓冲区处理隐藏面消除 )</title>
+</head>
+<body>
+
+<script src="../lib/cuon-matrix.js"></script>
+
+
+<canvas id="canvas" width="800" height="600"></canvas>
+
+<script>
+
+	var canvas = document.getElementById('canvas');
+	var gl = canvas.getContext('webgl');
+
+	function initShaders(gl, vshader_souce, fshader_source){
+		var vshader = gl.createShader(gl.VERTEX_SHADER);  
+		var fshader = gl.createShader(gl.FRAGMENT_SHADER);
+		var program = gl.createProgram();
+
+		//指定着色器源代码
+		gl.shaderSource(vshader, vshader_souce); 
+		gl.shaderSource(fshader, fshader_source); 
+
+		//编译着色器
+		gl.compileShader(vshader); 
+		gl.compileShader(fshader);
+
+		//使用程序对象连接着色器
+	    gl.attachShader(program, vshader);  
+	    gl.attachShader(program, fshader); 
+	    gl.linkProgram(program); 
+
+	    if(gl.getProgramParameter(program, gl.LINK_STATUS)){ 
+	    	gl.useProgram(program);  
+	    }else{
+	    	alert(gl.getProgramInfoLog(program));
+	    }
+
+	    gl.program = program;
+
+	}
+
+	//顶点着色器
+	var VSHADER_SOURCE = [
+		'uniform mat4 u_matirx;',
+		'attribute vec4 a_Position;',
+		'attribute vec4 a_FragColor;',
+		'varying vec4 v_FragColor;',
+		'void main(){ ',
+			'gl_Position = u_matirx * a_Position;',
+			'v_FragColor = a_FragColor;',
+		'}'
+
+	].join('');
+
+	//片段着色器
+	//片段着色器中的flat类型没有默认精度所以，需要单独制定精度限定符
+	var FSHADER_SOURCE = [
+		'precision mediump float;',
+		'varying vec4 v_FragColor;',
+		'void main(){ ',
+			'gl_FragColor = v_FragColor;',
+		'}'
+
+	].join('');
+	
+	initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+
+	initVerticesColors();
+
+
+
+  	var u_matirx = gl.getUniformLocation(gl.program, 'u_matirx');
+
+
+
+	var modelMatrix = new Matrix4(); // 模型矩阵
+	var viewlMatrix = new Matrix4(); // 视图矩阵
+	var projMatrix = new Matrix4();  // 投影矩阵
+
+	var mvpMatrix = new Matrix4();// 模型视图投影矩阵
+
+
+
+	modelMatrix.setTranslate(0.75, 0.0, 0.0) //平移矩阵，使三角形向x轴正方向平移0.75单位
+
+
+
+    //在webgl的默认状态视点为（0,0,0）观察点（0,0,-1）视点的上方向为(0,1,0)
+	//视图矩阵定了视点(相机)的位置， 观察点的位置， 和相机的上方向。视图矩阵相当于模型矩阵的逆矩阵。
+	//假如在webgl的默认状态下把视点移到（0.0,0.0,1.0），这时视点于原点上的视图对象的距离为1.0 相当于视点不变，把坐标系原点上的可视对象的位置平移到了(0,0,-1)的位置(参考webgl编程指南p225)
+
+
+	viewlMatrix.setLookAt(0.0, 0.0, 5.0, 0.0, 0.0, -100, 0.0, 1, 0.0);
+
+
+	//透视投影矩阵， 定义了可以空间范围, 只有在可视空间范围内的画面才能被显示出来。透视投影矩阵会根据图像形的Z坐标，通过矩阵的缩放和平移，体缩小处理远的物体，产生出具有层次感的画面，这里定义了透视投影可视空间的上平面和下平面的夹角为30度，指定近裁切面的宽高比为canvas的宽高比,近裁切面的距离为1，远裁切面的距离为100
+	projMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100); 
+
+
+	mvpMatrix.set(projMatrix).multiply(viewlMatrix).multiply(modelMatrix);
+
+
+	
+	//gl.uniformMatrix4fv(location, transpose, array)将array表示的4X4矩阵分配给locaton指定的unform变量。transpose在webgl中必须为false表示是否转置矩阵，转置操作将交换矩阵的行和列,webgl实现没有提供矩阵的转置方法。所以该参数必须设置为false.
+	//将模型视图投影矩阵的数据传递给顶点着色器中使用unform定义的变量u_matirx， 函数名后的最后一个字母v,表示可以向着色器传输多个数据值。
+	gl.uniformMatrix4fv(u_matirx, false, mvpMatrix.elements);
+
+	gl.enable(gl.DEPTH_TEST);//启用深度探测来处理隐藏面消除。
+
+	gl.clearColor(0.0,0.0,0.0,1.0);
+   
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);//隐藏面消除,webgl 默认情况下后绘制的内容会盖到之前绘制的内容上，清楚深度缓冲区可以让webgl根据可视对象深度信息（Z轴的大的在前面，小的在后面）来处理它们之间的前后关系。
+
+	gl.drawArrays(gl.TRIANGLES, 0, 9); 
+
+
+	//绘制左侧的三角形
+	modelMatrix.setTranslate(-0.75, 0.0, 0.0);
+	mvpMatrix.set(projMatrix).multiply(viewlMatrix).multiply(modelMatrix);
+	gl.uniformMatrix4fv(u_matirx, false, mvpMatrix.elements);
+	gl.drawArrays(gl.TRIANGLES, 0, 9);
+
+
+
+
+	function initVerticesColors(){
+
+
+		var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
+		var a_FragColor = gl.getAttribLocation(gl.program, 'a_FragColor');
+
+		
+
+		var verticesColors = new Float32Array([
+			
+				0.0, 1.0, 0.0, 0.4, 0.4, 1.0,
+			   -0.5, -1.0, 0.0, 0.4, 0.4, 1.0,	
+			    0.5, -1.0, 0.0, 1.0, 0.4, 0.4,	
+
+
+				0.0,  1.0, -2.0, 1.0, 1.0, 0.4,
+			   -0.5, -1.0, -2.0, 1.0, 1.0, 0.4,	
+			    0.5, -1.0, -2.0, 1.0, 0.4, 0.4,
+
+
+			    0.0,  1.0, -4.0, 0.4, 1.0, 0.4,
+			   -0.5, -1.0, -4.0, 0.4, 1.0, 0.4,	
+			    0.5, -1.0, -4.0, 1.0, 0.4, 0.4
+
+
+		]);
+
+		var FSIZE = verticesColors.BYTES_PER_ELEMENT;
+		var buffer = gl.createBuffer();//创建缓冲区对象
+
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, buffer)//绑定对象到到指定类型的缓冲区目标上
+		gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);//写入数据到到webgl缓冲区中
+
+		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, gl.FALSE, FSIZE * 6, 0);
+		gl.vertexAttribPointer(a_FragColor, 3, gl.FLOAT, gl.FALSE, FSIZE * 6, 3 * FSIZE); //将缓冲区对象的数据分配给在顶点着色器中使用attribute 修饰符定义的vec3类的变量 a_FragColor
+
+		gl.enableVertexAttribArray(a_Position);
+		gl.enableVertexAttribArray(a_FragColor);
+
+
+
+	}
+
+
+
+
+
+
+
+  
+
+
+</script>
+</body>
+</html>

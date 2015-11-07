@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title> select demo</title>
+		<script src="http://g.tbcdn.cn/fi/bui/jquery-1.8.1.min.js"></script>
+		<script src="http://underscorejs.org/underscore-min.js"></script>
+
+		<style type="text/css">
+		body{ font-size: 12px; }
+
+
+			.select-text{ position: relative; background-color: #fff; padding:0 5px;  border: 1px solid #ccc; height: 25px; line-height: 25px;  width: 100px;}
+			.select-list{ margin: -1px 0 0 0; padding: 5px 5px 0 5px; width: 100px; display: none; border: 1px solid #ccc; list-style: none;  background-color: #f8f8f8}
+			.select-list li{ margin-bottom: 1px; padding: 5px 3px; }
+			.select-list .selected,
+			.select-list li:hover{ background-color: #00f; color: #fff;}
+
+
+			.icon-arrow-down{ 
+				position: absolute; top: 8px; right: 5px;  width: 8px; height: 8px; 
+			 background: url(http://g.alicdn.com/bui/bui/1.1.21/img/sprite-469-300.png) no-repeat -1px -218px; }
+
+		</style>
+	</head>
+
+	<body>
+
+
+
+		<div id="div"></div>
+
+
+		<script src="../observable.js"></script>
+		<script src="component.select.js"></script>
+
+		<script type="text/javascript">
+
+			var component = new SelectComponent( "#div");
+		</script>
+	</body>
+</html>
